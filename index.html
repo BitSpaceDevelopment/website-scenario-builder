@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BSD XR Scenario Builder / Use Case Finder</title>
+  <meta
+    name="description"
+    content="Discover BSD XR scenario recommendations by industry and challenge."
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <script>
+    try {
+      if (localStorage.getItem("bsdxr-theme") === "light") {
+        document.documentElement.classList.add("light");
+      }
+    } catch (error) {}
+  </script>
+  <style>
+    :root {
+      --color-background: 10 10 10;
+      --color-surface: 17 17 17;
+      --color-surface-2: 24 24 24;
+      --color-border: 34 34 34;
+      --color-border-light: 51 51 51;
+      --color-text: 229 229 229;
+      --color-muted: 102 102 102;
+      --color-accent: 255 255 255;
+      --color-success: 74 222 128;
+    }
+
+    :root.light {
+      --color-background: 238 238 238;
+      --color-surface: 228 228 228;
+      --color-surface-2: 218 218 218;
+      --color-border: 204 204 204;
+      --color-border-light: 187 187 187;
+      --color-text: 17 17 17;
+      --color-muted: 119 119 119;
+      --color-accent: 27 79 216;
+      --color-success: 21 128 61;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Space Mono", monospace;
+      background-color: rgb(var(--color-background));
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 5px,
+        rgb(var(--color-border) / 0.16) 6px
+      );
+      color: rgb(var(--color-text));
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      line-height: 1.65;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+      text-transform: inherit;
+      letter-spacing: inherit;
+    }
+
+    .page {
+      width: min(1240px, calc(100% - 48px));
+      margin: 0 auto;
+      padding-bottom: 48px;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: rgb(var(--color-background) / 0.9);
+      border-bottom: 1px solid rgb(var(--color-border));
+    }
+
+    .site-header__inner {
+      width: min(1240px, calc(100% - 48px));
+      margin: 0 auto;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .site-logo img {
+      height: 30px;
+      width: auto;
+      display: block;
+    }
+
+    .site-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .eyebrow,
+    .micro-label {
+      font-size: 10px;
+      color: rgb(var(--color-muted));
+      letter-spacing: 0.28em;
+    }
+
+    .theme-toggle,
+    .cta-link,
+    .chip,
+    .option-button {
+      border: 1px solid rgb(var(--color-border));
+      background: transparent;
+      color: rgb(var(--color-muted));
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .theme-toggle,
+    .cta-link {
+      padding: 12px 16px;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+    }
+
+    .theme-toggle:hover,
+    .option-button:hover,
+    .chip:hover {
+      color: rgb(var(--color-text));
+      border-color: rgb(var(--color-border-light));
+    }
+
+    .app-shell {
+      padding: 28px 0 0;
+      display: grid;
+      gap: 20px;
+    }
+
+    .tool-banner,
+    .action-bar {
+      background: rgb(var(--color-surface));
+      border: 1px solid rgb(var(--color-border));
+      padding: 18px 22px;
+    }
+
+    .tool-banner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .tool-banner h1 {
+      font-size: clamp(28px, 5vw, 54px);
+      line-height: 1;
+      margin: 10px 0 14px;
+      letter-spacing: 0.1em;
+    }
+
+    .tool-banner p,
+    .tool-metrics p {
+      font-size: 12px;
+      color: rgb(var(--color-muted));
+    }
+
+    .tool-metrics {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric-card {
+      border-top: 1px solid rgb(var(--color-border));
+      padding-top: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .metric-card strong {
+      color: rgb(var(--color-text));
+      font-size: 12px;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-cluster {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .action-button {
+      padding: 12px 16px;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      border: 1px solid rgb(var(--color-border));
+      background: transparent;
+      color: rgb(var(--color-muted));
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .action-button:hover {
+      color: rgb(var(--color-text));
+      border-color: rgb(var(--color-border-light));
+    }
+
+    .action-button--primary {
+      color: rgb(var(--color-accent));
+      border-color: rgb(var(--color-accent));
+      background: rgb(var(--color-accent) / 0.08);
+    }
+
+    .action-button--primary:hover {
+      color: rgb(var(--color-background));
+      background: rgb(var(--color-accent));
+      border-color: rgb(var(--color-accent));
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: 24px;
+    }
+
+    .panel,
+    .result-card,
+    .insight-card,
+    .cta-panel {
+      background: rgb(var(--color-surface));
+      border: 1px solid rgb(var(--color-border));
+    }
+
+    .panel {
+      padding: 24px;
+      align-self: start;
+      position: sticky;
+      top: 96px;
+    }
+
+    .panel h2,
+    .results-header h2 {
+      font-size: 24px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+
+    .panel-copy,
+    .results-header p,
+    .result-card p,
+    .insight-card p,
+    .cta-panel p {
+      font-size: 12px;
+      color: rgb(var(--color-muted));
+    }
+
+    .selection-group + .selection-group {
+      margin-top: 28px;
+    }
+
+    .group-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .group-header h3 {
+      font-size: 12px;
+      color: rgb(var(--color-text));
+    }
+
+    .option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field--full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      font-size: 10px;
+      color: rgb(var(--color-muted));
+      letter-spacing: 0.22em;
+    }
+
+    .text-input,
+    .text-area {
+      width: 100%;
+      border: 1px solid rgb(var(--color-border));
+      background: rgb(var(--color-background));
+      color: rgb(var(--color-text));
+      padding: 13px 14px;
+      outline: none;
+      resize: vertical;
+    }
+
+    .text-input:focus,
+    .text-area:focus {
+      border-color: rgb(var(--color-border-light));
+    }
+
+    .option-button {
+      text-align: left;
+      padding: 14px 14px 16px;
+      font-size: 11px;
+      min-height: 74px;
+    }
+
+    .option-button span {
+      display: block;
+    }
+
+    .option-button .option-kicker {
+      margin-bottom: 8px;
+      font-size: 9px;
+      letter-spacing: 0.22em;
+      color: rgb(var(--color-muted));
+    }
+
+    .option-button.is-active {
+      color: rgb(var(--color-accent));
+      border-color: rgb(var(--color-accent));
+      background: rgb(var(--color-accent) / 0.08);
+    }
+
+    .results {
+      display: grid;
+      gap: 24px;
+      align-content: start;
+    }
+
+    .preview-panel {
+      background: rgb(var(--color-surface));
+      border: 1px solid rgb(var(--color-border));
+      padding: 24px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .preview-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: start;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgb(var(--color-border));
+    }
+
+    .preview-header h2 {
+      font-size: 30px;
+      line-height: 1.05;
+      margin: 10px 0 10px;
+    }
+
+    .preview-header p {
+      font-size: 12px;
+      color: rgb(var(--color-muted));
+      max-width: 640px;
+    }
+
+    .preview-meta {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      background: rgb(var(--color-border));
+      border: 1px solid rgb(var(--color-border));
+    }
+
+    .preview-meta-item {
+      background: rgb(var(--color-background));
+      padding: 14px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .preview-meta-item strong {
+      font-size: 12px;
+      color: rgb(var(--color-text));
+      word-break: break-word;
+    }
+
+    .report-section {
+      display: grid;
+      gap: 14px;
+      padding-top: 20px;
+      border-top: 1px solid rgb(var(--color-border));
+    }
+
+    .report-section h3 {
+      font-size: 14px;
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .results-header {
+      padding: 4px 0 0;
+    }
+
+    .selection-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .chip {
+      padding: 9px 12px;
+      font-size: 10px;
+      cursor: default;
+    }
+
+    .chip strong {
+      color: rgb(var(--color-text));
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+
+    .insight-card,
+    .cta-panel {
+      padding: 22px;
+    }
+
+    .insight-card ul,
+    .result-card ul {
+      list-style: none;
+      margin-top: 16px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .insight-card li,
+    .result-card li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 11px;
+      color: rgb(var(--color-text));
+    }
+
+    .insight-card li::before,
+    .result-card li::before {
+      content: "+";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: rgb(var(--color-accent));
+    }
+
+    .recommendation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .result-card {
+      padding: 20px;
+      min-height: 100%;
+    }
+
+    .result-card .rank {
+      display: inline-flex;
+      margin-bottom: 18px;
+      color: rgb(var(--color-success));
+      border: 1px solid rgb(var(--color-border));
+      padding: 7px 10px;
+      font-size: 10px;
+      background: rgb(var(--color-surface-2));
+    }
+
+    .result-card h3 {
+      font-size: 17px;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .result-card footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid rgb(var(--color-border));
+      font-size: 10px;
+      color: rgb(var(--color-muted));
+    }
+
+    .cta-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      background: rgb(var(--color-surface-2));
+    }
+
+    .cta-panel h3 {
+      font-size: 22px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .cta-link {
+      color: rgb(var(--color-accent));
+      border-color: rgb(var(--color-accent));
+      white-space: nowrap;
+    }
+
+    .cta-link:hover {
+      background: rgb(var(--color-accent));
+      color: rgb(var(--color-background));
+      border-color: rgb(var(--color-accent));
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid rgb(var(--color-border));
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 10px;
+      color: rgb(var(--color-muted));
+    }
+
+    .print-only {
+      display: none;
+    }
+
+    @media (max-width: 1024px) {
+      .workspace,
+      .tool-banner,
+      .preview-header,
+      .preview-meta,
+      .report-grid,
+      .summary-grid,
+      .recommendation-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        position: static;
+      }
+
+    }
+
+    @media (max-width: 640px) {
+      .page,
+      .site-header__inner {
+        width: min(100% - 28px, 1240px);
+      }
+
+      .site-header__inner,
+      .site-actions,
+      .action-bar,
+      .cta-panel,
+      .footer-note {
+        align-items: flex-start;
+      }
+
+      .site-header__inner,
+      .action-bar,
+      .cta-panel,
+      .footer-note {
+        flex-direction: column;
+      }
+
+      .field-grid,
+      .option-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .theme-toggle,
+      .cta-link,
+      .action-button {
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #000000;
+        background-image: none;
+      }
+
+      .site-header,
+      .panel,
+      .action-bar,
+      .footer-note,
+      .screen-only {
+        display: none !important;
+      }
+
+      .page {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .app-shell,
+      .workspace,
+      .results {
+        display: block;
+      }
+
+      .tool-banner {
+        border: 1px solid #cccccc;
+        margin-bottom: 20px;
+        break-inside: avoid;
+      }
+
+      .preview-panel,
+      .insight-card,
+      .result-card,
+      .cta-panel {
+        background: #ffffff;
+        border-color: #cccccc;
+        break-inside: avoid;
+      }
+
+      .print-only {
+        display: block;
+      }
+
+      .recommendation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="site-logo" href="#top" aria-label="BSD XR">
+        <img
+          id="site-logo"
+          src="./branding/logo-dark.png"
+          alt="BSD XR"
+        />
+      </a>
+      <div class="site-actions">
+        <div class="micro-label">Scenario Builder / Use Case Finder</div>
+        <button id="theme-toggle" class="theme-toggle" type="button">Switch Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page" id="top">
+    <section class="app-shell" aria-label="Scenario builder">
+      <section class="tool-banner">
+        <div>
+          <div class="eyebrow">BSD XR / Interactive Tool</div>
+          <h1>Scenario Builder / Use Case Finder</h1>
+          <p>
+            Build an exportable scenario brief by selecting an industry and challenge, then add
+            client details and notes for a downloadable PDF-ready output.
+          </p>
+        </div>
+        <div class="tool-metrics">
+          <div class="metric-card">
+            <span class="micro-label">Mode</span>
+            <strong>Interactive Scenario Configuration</strong>
+          </div>
+          <div class="metric-card">
+            <span class="micro-label">Output</span>
+            <strong>Recommendation Set + Summary Brief + PDF Export</strong>
+          </div>
+          <div class="metric-card">
+            <span class="micro-label">Use</span>
+            <p>Sales discovery, solution framing, and internal scoping conversations.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="action-bar screen-only">
+        <div>
+          <div class="eyebrow">Workflow</div>
+          <p class="panel-copy">Configure the scenario, review the brief, then export it as a PDF.</p>
+        </div>
+        <div class="action-cluster">
+          <button id="reset-tool" class="action-button" type="button">Reset</button>
+          <button id="download-pdf" class="action-button action-button--primary" type="button">Generate PDF</button>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="panel">
+          <div class="eyebrow">Configuration</div>
+          <h2>Scenario Inputs</h2>
+          <p class="panel-copy">
+            Define the client context first, then select the industry and challenge combination.
+          </p>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="client-name">Client / Account</label>
+              <input id="client-name" class="text-input" type="text" placeholder="Enter Client Name" />
+            </div>
+            <div class="field">
+              <label for="project-name">Opportunity / Project</label>
+              <input id="project-name" class="text-input" type="text" placeholder="Enter Project Name" />
+            </div>
+            <div class="field">
+              <label for="contact-name">Prepared By</label>
+              <input id="contact-name" class="text-input" type="text" placeholder="BSD XR Team Member" />
+            </div>
+            <div class="field">
+              <label for="priority-level">Priority</label>
+              <input id="priority-level" class="text-input" type="text" placeholder="High / Medium / Exploratory" />
+            </div>
+            <div class="field field--full">
+              <label for="scenario-notes">Scenario Notes</label>
+              <textarea id="scenario-notes" class="text-area" rows="5" placeholder="Add customer goals, operational pain points, or deployment notes."></textarea>
+            </div>
+          </div>
+
+          <div class="selection-group">
+            <div class="group-header">
+              <h3>Industry</h3>
+              <div class="micro-label" id="industry-current-label">Manufacturing</div>
+            </div>
+            <div class="option-grid" id="industry-options"></div>
+          </div>
+
+          <div class="selection-group">
+            <div class="group-header">
+              <h3>Challenge</h3>
+              <div class="micro-label" id="challenge-current-label">Safety Training</div>
+            </div>
+            <div class="option-grid" id="challenge-options"></div>
+          </div>
+        </aside>
+
+        <section class="results">
+          <article class="preview-panel">
+            <div class="print-only eyebrow">BSD XR / Scenario Brief</div>
+            <div class="preview-header">
+              <div>
+                <div class="eyebrow">Scenario Brief</div>
+                <h2 id="scenario-title">XR Programs For Manufacturing Safety Training</h2>
+                <p id="scenario-summary">
+                  Practical immersive programs designed to reduce risk, standardize procedures,
+                  and improve readiness before work reaches the floor.
+                </p>
+              </div>
+              <div class="selection-strip">
+                <div class="chip"><span class="micro-label">Industry</span> <strong id="industry-chip">Manufacturing</strong></div>
+                <div class="chip"><span class="micro-label">Challenge</span> <strong id="challenge-chip">Safety Training</strong></div>
+                <div class="chip"><span class="micro-label">Primary Motion</span> <strong id="motion-chip">Train Before Exposure</strong></div>
+              </div>
+            </div>
+
+            <div class="preview-meta">
+              <div class="preview-meta-item">
+                <span class="micro-label">Client</span>
+                <strong id="client-output">Not Set</strong>
+              </div>
+              <div class="preview-meta-item">
+                <span class="micro-label">Project</span>
+                <strong id="project-output">Scenario Discovery</strong>
+              </div>
+              <div class="preview-meta-item">
+                <span class="micro-label">Prepared By</span>
+                <strong id="contact-output">BSD XR</strong>
+              </div>
+              <div class="preview-meta-item">
+                <span class="micro-label">Date</span>
+                <strong id="date-output">Pending</strong>
+              </div>
+            </div>
+
+            <section class="report-section">
+              <div class="eyebrow">Executive Summary</div>
+              <p id="why-it-works">
+                XR closes the gap between written process and repeatable action by placing teams in
+                realistic, measurable environments before the real-world task begins.
+              </p>
+            </section>
+
+            <section class="report-section">
+              <div class="report-grid">
+                <article class="insight-card">
+                  <div class="eyebrow">Business Impact</div>
+                  <p id="brief-impact-copy">
+                    Recommended impact areas for this scenario selection.
+                  </p>
+                  <ul id="impact-list"></ul>
+                </article>
+
+                <article class="insight-card">
+                  <div class="eyebrow">Deployment Notes</div>
+                  <p id="deployment-notes">
+                    Start with the highest-friction workflow, then expand to adjacent procedures
+                    once the organization sees completion and confidence data.
+                  </p>
+                  <ul id="fit-list"></ul>
+                </article>
+              </div>
+            </section>
+
+            <section class="report-section">
+              <div class="eyebrow">Recommended XR Solutions</div>
+              <div class="recommendation-grid" id="recommendation-grid"></div>
+            </section>
+
+            <section class="report-section">
+              <div class="report-grid">
+                <article class="insight-card">
+                  <div class="eyebrow">Client Notes</div>
+                  <p id="notes-output">No notes added yet.</p>
+                </article>
+                <article class="insight-card">
+                  <div class="eyebrow">Next Step</div>
+                  <p id="cta-copy">
+                    Turn this use case into a scoping conversation with the BSD XR team.
+                  </p>
+                  <a
+                    id="cta-link"
+                    class="cta-link"
+                    href="https://bsdxr.com/contact"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Talk To BSD XR About This Scenario
+                  </a>
+                </article>
+              </div>
+            </section>
+          </article>
+
+          <div class="footer-note">
+            <span>Bit Space Development Ltd. / Immersive Technology Experts</span>
+            <span>Winnipeg, MB, Canada / Since 2015</span>
+          </div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const industries = [
+      {
+        id: "manufacturing",
+        name: "Manufacturing",
+        kicker: "Precision Ops",
+        motion: "Train Before Exposure"
+      },
+      {
+        id: "healthcare",
+        name: "Healthcare",
+        kicker: "Clinical Readiness",
+        motion: "Practice Under Pressure"
+      },
+      {
+        id: "aerospace",
+        name: "Aerospace",
+        kicker: "Mission Critical",
+        motion: "Protect Quality At Scale"
+      },
+      {
+        id: "construction",
+        name: "Construction",
+        kicker: "Field Execution",
+        motion: "Guide Work In Context"
+      },
+      {
+        id: "education",
+        name: "Education",
+        kicker: "Applied Learning",
+        motion: "Increase Engagement"
+      }
+    ];
+
+    const challenges = [
+      {
+        id: "safety-training",
+        name: "Safety Training",
+        kicker: "Risk Reduction"
+      },
+      {
+        id: "equipment-onboarding",
+        name: "Equipment Onboarding",
+        kicker: "Faster Ramp"
+      },
+      {
+        id: "soft-skills",
+        name: "Soft Skills",
+        kicker: "Human Factors"
+      },
+      {
+        id: "remote-assistance",
+        name: "Remote Assistance",
+        kicker: "Distributed Support"
+      },
+      {
+        id: "maintenance-procedures",
+        name: "Maintenance Procedures",
+        kicker: "Repeatable Service"
+      }
+    ];
+
+    const scenarioMap = {
+      manufacturing: {
+        "safety-training": {
+          title: "XR Programs For Manufacturing Safety Training",
+          summary:
+            "Use immersive rehearsal to reduce floor risk, enforce lockout steps, and build confidence before personnel interact with live equipment.",
+          why:
+            "High-consequence manufacturing tasks benefit from embodied repetition. XR gives teams realistic exposure without putting people, equipment, or production schedules at risk.",
+          deployment:
+            "Start with a single procedure that already has incident history or high certification demand, then layer assessment analytics into your onboarding program.",
+          motion: "Train Before Exposure",
+          impacts: [
+            "Reduce exposure to live hazards during first-pass training",
+            "Standardize safety-critical steps across shifts and sites",
+            "Capture completion, timing, and decision-point data"
+          ],
+          fit: [
+            "Strong fit for lockout/tagout and machine isolation workflows",
+            "Works well when downtime makes on-equipment practice expensive",
+            "Pairs with LMS reporting and supervisor sign-off"
+          ],
+          recommendations: [
+            {
+              title: "VR Lockout / Tagout Training",
+              description:
+                "Run operators through exact isolation sequences, hazard checks, and consequence-based assessments before floor access.",
+              outcomes: ["Lower training risk", "Higher procedure retention", "Audit-ready completion data"]
+            },
+            {
+              title: "AR Assisted Inspections",
+              description:
+                "Overlay inspection checkpoints on machinery so technicians confirm condition, sequence, and documentation in context.",
+              outcomes: ["Fewer missed steps", "More consistent inspections", "Faster supervisor review"]
+            },
+            {
+              title: "WebXR Safety Walkthroughs",
+              description:
+                "Deliver browser-based plant hazard orientation for new hires, contractors, and distributed teams without specialized installs.",
+              outcomes: ["Simple deployment", "Reusable orientation content", "Accessible across sites"]
+            }
+          ]
+        },
+        "equipment-onboarding": {
+          title: "XR Programs For Manufacturing Equipment Onboarding",
+          summary:
+            "Accelerate operator readiness with guided simulations and contextual overlays that shorten the path from classroom to competent operation.",
+          why:
+            "Manufacturing onboarding often fails between theory and first machine interaction. XR closes that gap with repeatable practice on realistic equipment states.",
+          deployment:
+            "Prioritize the equipment categories with the longest ramp time or most frequent operator errors, then expand using a reusable content framework.",
+          motion: "Increase Operator Readiness",
+          impacts: [
+            "Reduce trainer dependency during high-volume onboarding",
+            "Shorten time-to-confidence for complex machines",
+            "Create a shared baseline before supervised floor work"
+          ],
+          fit: [
+            "Ideal for multi-step startup and shutdown routines",
+            "Useful when equipment access is limited by production schedules",
+            "Supports multilingual and self-paced learning models"
+          ],
+          recommendations: [
+            {
+              title: "Interactive Equipment Start-Up Simulations",
+              description:
+                "Guide operators through controls, system states, and common failure conditions in a safe digital twin workflow.",
+              outcomes: ["Faster ramp-up", "Fewer first-week errors", "More scalable onboarding"]
+            },
+            {
+              title: "AR Machine Familiarization Guides",
+              description:
+                "Label critical parts, safety zones, and operator touchpoints directly on equipment during first-use sessions.",
+              outcomes: ["Better retention", "Less trainer repetition", "Stronger part recognition"]
+            },
+            {
+              title: "WebXR SOP Walkthroughs",
+              description:
+                "Turn standard operating procedures into spatial step-by-step onboarding modules accessible from any browser.",
+              outcomes: ["Easy rollout", "Consistent instruction", "Cross-site adoption"]
+            }
+          ]
+        },
+        "soft-skills": {
+          title: "XR Programs For Manufacturing Soft Skills",
+          summary:
+            "Improve communication, escalation, and leadership behaviors in high-pressure production environments where coordination matters as much as procedure.",
+          why:
+            "Operational performance depends on clear communication during shift handoffs, incident escalation, and coaching. XR allows repeated human-interaction practice without real-world fallout.",
+          deployment:
+            "Use soft-skill simulations alongside technical training so teams learn not just what to do, but how to communicate when stakes rise.",
+          motion: "Strengthen Team Coordination",
+          impacts: [
+            "Improve escalation language during process deviations",
+            "Rehearse difficult supervisor and peer conversations",
+            "Support frontline leadership development"
+          ],
+          fit: [
+            "Useful for safety leadership and shift-handoff scenarios",
+            "Works best with branching conversations and scoring",
+            "Can be shared across plants with small localization changes"
+          ],
+          recommendations: [
+            {
+              title: "Supervisor Coaching Simulations",
+              description:
+                "Practice feedback, intervention, and corrective coaching conversations in realistic production contexts.",
+              outcomes: ["Stronger frontline leadership", "More consistent coaching", "Safer culture"]
+            },
+            {
+              title: "Shift Handoff Decision Labs",
+              description:
+                "Simulate ambiguous production updates so teams learn how to communicate risk, maintenance status, and workarounds clearly.",
+              outcomes: ["Fewer communication gaps", "Better shift continuity", "Reduced rework"]
+            },
+            {
+              title: "Safety Culture Roleplay Modules",
+              description:
+                "Use scenario-based interactions to reinforce speaking up, near-miss reporting, and intervention habits.",
+              outcomes: ["Higher engagement", "Better reporting behavior", "Shared expectations"]
+            }
+          ]
+        },
+        "remote-assistance": {
+          title: "XR Programs For Manufacturing Remote Assistance",
+          summary:
+            "Connect field operators with remote experts using spatial instructions, live context, and guided troubleshooting without waiting for travel.",
+          why:
+            "Downtime grows when expertise is centralized. XR remote support brings specialist guidance to the line immediately while preserving visual context.",
+          deployment:
+            "Begin with the highest-cost machine stoppages, then build a knowledge base from the sessions that resolve them.",
+          motion: "Extend Expert Reach",
+          impacts: [
+            "Reduce time waiting for specialized support",
+            "Capture repeatable troubleshooting pathways",
+            "Support plants with limited on-site expertise"
+          ],
+          fit: [
+            "Strong fit for distributed operations and vendor support",
+            "Useful where travel delays amplify downtime cost",
+            "Pairs well with digital work instructions and recording"
+          ],
+          recommendations: [
+            {
+              title: "WebXR Remote Maintenance Guides",
+              description:
+                "Combine browser-based spatial annotations with live support sessions to guide operators through diagnostics and safe intervention.",
+              outcomes: ["Less downtime", "Faster troubleshooting", "No heavy install burden"]
+            },
+            {
+              title: "AR Expert Assist Sessions",
+              description:
+                "Let remote specialists mark up the operator's view so repair, inspection, and verification steps are clear in real time.",
+              outcomes: ["Higher first-time fix rate", "Reduced travel", "Better field confidence"]
+            },
+            {
+              title: "Recorded Resolution Playbooks",
+              description:
+                "Turn solved incidents into reusable guided modules for similar events across the production network.",
+              outcomes: ["Institutionalized expertise", "Lower repeat issue cost", "Faster future recovery"]
+            }
+          ]
+        },
+        "maintenance-procedures": {
+          title: "XR Programs For Manufacturing Maintenance Procedures",
+          summary:
+            "Improve consistency and safety in recurring service tasks with guided maintenance sequences and contextual verification.",
+          why:
+            "Maintenance quality depends on step fidelity, part recognition, and safe isolation. XR reinforces all three while reducing documentation friction.",
+          deployment:
+            "Focus on preventive maintenance routines with high variability or frequent audit findings, then broaden to corrective tasks.",
+          motion: "Standardize Service Execution",
+          impacts: [
+            "Reduce skipped or reordered service steps",
+            "Support less-experienced technicians during complex work",
+            "Improve maintenance documentation quality"
+          ],
+          fit: [
+            "Ideal for PM checklists and overhaul procedures",
+            "Useful for mixed fleets with model-specific differences",
+            "Can link service completion to enterprise systems"
+          ],
+          recommendations: [
+            {
+              title: "AR Assisted Maintenance Workflows",
+              description:
+                "Display service steps, torque values, and verification prompts directly in the technician's working view.",
+              outcomes: ["More consistent work", "Better step compliance", "Reduced reference switching"]
+            },
+            {
+              title: "VR Maintenance Rehearsal",
+              description:
+                "Train teams on infrequent or high-risk maintenance tasks before the actual shutdown window begins.",
+              outcomes: ["Lower shutdown risk", "Faster execution", "Higher technician readiness"]
+            },
+            {
+              title: "Web-Based Digital Procedure Guides",
+              description:
+                "Distribute interactive maintenance content across devices for quick access, revision control, and supervisor review.",
+              outcomes: ["Easy updates", "Broader access", "Cleaner procedure governance"]
+            }
+          ]
+        }
+      },
+      healthcare: {
+        "safety-training": {
+          title: "XR Programs For Healthcare Safety Training",
+          summary:
+            "Prepare staff for safety-critical clinical and facility scenarios with repeatable simulations that build speed, clarity, and compliance.",
+          why:
+            "Healthcare teams need realistic repetition for rare but high-pressure events. XR enables practice without disrupting patient care or clinical operations.",
+          deployment:
+            "Start with one environment such as emergency response, infection control, or patient transfer, then connect outcomes to competency reviews.",
+          motion: "Practice Under Pressure",
+          impacts: [
+            "Improve readiness for infrequent high-stakes events",
+            "Reinforce protocols without consuming live rooms",
+            "Support multidisciplinary team rehearsal"
+          ],
+          fit: [
+            "Effective for infection control and emergency response",
+            "Useful when real-world simulation space is limited",
+            "Supports repeatable competency validation"
+          ],
+          recommendations: [
+            {
+              title: "VR Clinical Emergency Drills",
+              description:
+                "Rehearse rapid response, code events, and escalation sequences in immersive clinical spaces.",
+              outcomes: ["Faster response", "Stronger protocol recall", "Better team alignment"]
+            },
+            {
+              title: "AR Safety Checklists For Care Spaces",
+              description:
+                "Guide staff through room readiness, PPE verification, and safety-critical setup tasks with in-context prompts.",
+              outcomes: ["Fewer omissions", "More consistent preparation", "Clear audit trail"]
+            },
+            {
+              title: "WebXR Facility Orientation",
+              description:
+                "Deliver browser-based walkthroughs for site safety, restricted zones, and emergency procedures across roles.",
+              outcomes: ["Scalable onboarding", "Cross-site consistency", "Lower scheduling friction"]
+            }
+          ]
+        },
+        "equipment-onboarding": {
+          title: "XR Programs For Healthcare Equipment Onboarding",
+          summary:
+            "Shorten ramp time on medical devices and room systems through guided simulation, anatomy-aware visualization, and contextual prompts.",
+          why:
+            "Device confidence matters in clinical environments where hesitation can affect care quality. XR supports safe first-use practice before patient-facing work begins.",
+          deployment:
+            "Target devices that have complex setup, frequent misuse, or limited trainer availability to generate early value.",
+          motion: "Accelerate Clinical Confidence",
+          impacts: [
+            "Improve first-use accuracy on complex devices",
+            "Reduce dependency on limited super-user staff",
+            "Support recurring competency refreshers"
+          ],
+          fit: [
+            "Strong for imaging, monitoring, and procedural equipment",
+            "Useful in teaching hospitals and multi-site systems",
+            "Can integrate with device vendor content"
+          ],
+          recommendations: [
+            {
+              title: "AR Device Setup Guides",
+              description:
+                "Overlay setup, calibration, and safety prompts on clinical equipment during onboarding sessions.",
+              outcomes: ["Fewer setup errors", "Faster onboarding", "Higher staff confidence"]
+            },
+            {
+              title: "VR Equipment Familiarization Labs",
+              description:
+                "Let staff practice workflows and error recovery inside a realistic digital environment before touching the live device.",
+              outcomes: ["Safer first use", "Better retention", "Lower trainer burden"]
+            },
+            {
+              title: "Interactive Clinical SOP Modules",
+              description:
+                "Turn equipment documentation into guided, measurable browser-based learning modules.",
+              outcomes: ["Scalable updates", "Trackable learning", "Consistent instruction"]
+            }
+          ]
+        },
+        "soft-skills": {
+          title: "XR Programs For Healthcare Soft Skills",
+          summary:
+            "Build empathy, de-escalation, and patient communication skills through repeatable immersive roleplay.",
+          why:
+            "Clinical communication affects safety, trust, and outcomes. XR creates realistic human scenarios that are difficult to stage consistently in live training.",
+          deployment:
+            "Use branching scenarios for patient interactions, family communication, and difficult care conversations across experience levels.",
+          motion: "Improve Human Interaction",
+          impacts: [
+            "Support empathy and bedside communication training",
+            "Rehearse difficult conversations without live consequences",
+            "Improve consistency in service and care delivery"
+          ],
+          fit: [
+            "Strong for nursing, intake, and frontline care teams",
+            "Useful for de-escalation and compassionate communication",
+            "Can be adapted for clinical education programs"
+          ],
+          recommendations: [
+            {
+              title: "Patient Communication Simulations",
+              description:
+                "Practice explaining procedures, gathering information, and building trust with responsive virtual patients.",
+              outcomes: ["Better patient experience", "Higher staff confidence", "More consistent communication"]
+            },
+            {
+              title: "De-Escalation Roleplay Modules",
+              description:
+                "Train staff to respond calmly and safely to agitated patients or families using guided immersive scenarios.",
+              outcomes: ["Safer interactions", "Reduced conflict", "Improved staff readiness"]
+            },
+            {
+              title: "Empathy Training Experiences",
+              description:
+                "Use perspective-shifting simulations to build awareness of patient limitations, stressors, and communication barriers.",
+              outcomes: ["Stronger empathy", "Improved care quality", "More reflective practice"]
+            }
+          ]
+        },
+        "remote-assistance": {
+          title: "XR Programs For Healthcare Remote Assistance",
+          summary:
+            "Support clinicians, technicians, and educators with real-time expert guidance across distributed facilities and partner sites.",
+          why:
+            "Remote expertise reduces delays when specialized support is needed but not physically present. XR preserves context so instructions are clearer and faster to follow.",
+          deployment:
+            "Start with technical support or procedural coaching workflows where travel and availability create bottlenecks.",
+          motion: "Extend Clinical Expertise",
+          impacts: [
+            "Bring specialist guidance to remote teams faster",
+            "Reduce travel and support delays",
+            "Preserve visual context during assistance sessions"
+          ],
+          fit: [
+            "Useful for biomedical support and distributed education",
+            "Effective for procedural coaching and setup support",
+            "Works well with browser-based delivery for accessibility"
+          ],
+          recommendations: [
+            {
+              title: "WebXR Remote Procedure Support",
+              description:
+                "Enable secure remote guidance with shared visual context for device setup, simulation, or technical intervention.",
+              outcomes: ["Faster support", "Better clarity", "Broader reach"]
+            },
+            {
+              title: "AR Technical Assist For Biomed Teams",
+              description:
+                "Let experts annotate live device views during diagnostics and repair to support local technicians.",
+              outcomes: ["Higher first-time resolution", "Less travel", "More confident technicians"]
+            },
+            {
+              title: "Virtual Skills Mentoring",
+              description:
+                "Use immersive remote sessions to coach learners through scenario-based tasks without requiring co-location.",
+              outcomes: ["Scalable mentoring", "Flexible delivery", "Improved access"]
+            }
+          ]
+        },
+        "maintenance-procedures": {
+          title: "XR Programs For Healthcare Maintenance Procedures",
+          summary:
+            "Standardize service and verification workflows for medical equipment and facilities with guided in-context procedures.",
+          why:
+            "Healthcare maintenance must balance technical accuracy, compliance, and uptime. XR keeps technicians on sequence while reducing back-and-forth with manuals.",
+          deployment:
+            "Begin with the equipment categories that have the heaviest documentation load or most frequent service variation.",
+          motion: "Protect Uptime And Compliance",
+          impacts: [
+            "Improve consistency in regulated service workflows",
+            "Reduce documentation friction during maintenance",
+            "Support less-experienced technical staff"
+          ],
+          fit: [
+            "Useful for device PMs and room turnover protocols",
+            "Strong where documentation quality is audit-sensitive",
+            "Can align with enterprise asset systems"
+          ],
+          recommendations: [
+            {
+              title: "AR Biomedical Maintenance Guides",
+              description:
+                "Provide step-aware overlays, part identification, and pass/fail verification during device service.",
+              outcomes: ["Higher consistency", "Better documentation", "Less manual lookup"]
+            },
+            {
+              title: "VR Service Rehearsal For Rare Tasks",
+              description:
+                "Rehearse low-frequency or high-complexity maintenance work before touching production equipment.",
+              outcomes: ["Lower service risk", "Improved readiness", "Faster execution"]
+            },
+            {
+              title: "Digital Procedure Libraries",
+              description:
+                "Distribute controlled, interactive maintenance content across teams with clear revision governance.",
+              outcomes: ["Cleaner updates", "More accessible procedures", "Fewer legacy docs"]
+            }
+          ]
+        }
+      },
+      aerospace: {
+        "safety-training": {
+          title: "XR Programs For Aerospace Safety Training",
+          summary:
+            "Use immersive safety rehearsal to prepare teams for high-consequence procedures, restricted access environments, and exacting compliance demands.",
+          why:
+            "Aerospace work combines precision with high cost of error. XR provides safe, repeatable exposure to procedures that are difficult or expensive to rehearse live.",
+          deployment:
+            "Focus first on procedures with high certification value, constrained access, or strong audit requirements.",
+          motion: "Protect Quality At Scale",
+          impacts: [
+            "Rehearse rare but critical safety procedures",
+            "Reduce risk during first exposure to complex environments",
+            "Support compliance-driven documentation"
+          ],
+          fit: [
+            "Strong for hangar, assembly, and MRO environments",
+            "Useful when access to real assets is constrained",
+            "Supports standardized global training"
+          ],
+          recommendations: [
+            {
+              title: "VR Safety And Access Training",
+              description:
+                "Prepare personnel for restricted-zone entry, hazard recognition, and emergency response inside aerospace facilities.",
+              outcomes: ["Safer readiness", "Standardized compliance", "Reduced live exposure"]
+            },
+            {
+              title: "AR Pre-Task Safety Checks",
+              description:
+                "Overlay critical safety verifications before teams begin sensitive work on aircraft or systems.",
+              outcomes: ["Fewer missed checks", "Higher process fidelity", "Stronger accountability"]
+            },
+            {
+              title: "WebXR Compliance Walkthroughs",
+              description:
+                "Deliver accessible, measurable safety orientation modules across distributed aerospace teams and partners.",
+              outcomes: ["Simple rollout", "Global consistency", "Trackable completion"]
+            }
+          ]
+        },
+        "equipment-onboarding": {
+          title: "XR Programs For Aerospace Equipment Onboarding",
+          summary:
+            "Accelerate readiness on specialized equipment, systems, and tooling with guided immersive familiarization.",
+          why:
+            "When assets are scarce and mistakes are expensive, teams need safe repetition before real access. XR turns onboarding into a scalable operational asset.",
+          deployment:
+            "Use onboarding modules for the tools and systems that are difficult to access, expensive to idle, or highly process-dependent.",
+          motion: "Increase Asset Readiness",
+          impacts: [
+            "Shorten ramp time on specialized systems",
+            "Reduce trainer and asset scheduling pressure",
+            "Improve confidence before live work begins"
+          ],
+          fit: [
+            "Useful for MRO tooling and assembly equipment",
+            "Strong when access windows are narrow",
+            "Supports contractor and partner onboarding"
+          ],
+          recommendations: [
+            {
+              title: "VR Tooling Familiarization",
+              description:
+                "Teach equipment setup, sequencing, and failure conditions in a realistic but risk-free environment.",
+              outcomes: ["Faster proficiency", "Better retention", "Reduced live training load"]
+            },
+            {
+              title: "AR Assisted System Walkthroughs",
+              description:
+                "Label interfaces, checkpoints, and inspection zones directly on the physical asset during initial training.",
+              outcomes: ["Clearer orientation", "Lower confusion", "Stronger step recall"]
+            },
+            {
+              title: "WebXR Aircraft Systems Explorer",
+              description:
+                "Use browser-based spatial content to introduce complex systems without requiring full simulator access.",
+              outcomes: ["Broader access", "Lower hardware friction", "Flexible delivery"]
+            }
+          ]
+        },
+        "soft-skills": {
+          title: "XR Programs For Aerospace Soft Skills",
+          summary:
+            "Strengthen communication, coordination, and decision-making in environments where technical excellence still depends on human alignment.",
+          why:
+            "Aerospace quality and safety often hinge on handoffs, escalation, and cross-discipline coordination. XR makes these human dynamics trainable and measurable.",
+          deployment:
+            "Focus on supervision, crew coordination, and issue escalation scenarios where communication quality directly affects outcomes.",
+          motion: "Improve Team Precision",
+          impacts: [
+            "Support clearer shift and team handoffs",
+            "Improve escalation during quality deviations",
+            "Build leadership confidence in regulated settings"
+          ],
+          fit: [
+            "Strong for maintenance teams and quality leaders",
+            "Useful in distributed or multi-vendor programs",
+            "Effective with scored branching scenarios"
+          ],
+          recommendations: [
+            {
+              title: "Quality Escalation Simulations",
+              description:
+                "Train staff to communicate issues, risks, and hold points clearly under schedule pressure.",
+              outcomes: ["Better escalation", "Reduced ambiguity", "Stronger quality culture"]
+            },
+            {
+              title: "Crew Coordination Roleplay",
+              description:
+                "Rehearse collaborative decision-making across technical teams working on time-sensitive operations.",
+              outcomes: ["Improved coordination", "Fewer handoff errors", "Better trust"]
+            },
+            {
+              title: "Leadership Communication Labs",
+              description:
+                "Build coaching, feedback, and intervention skills for supervisors managing high-stakes work.",
+              outcomes: ["More effective leaders", "Stronger accountability", "Safer conversations"]
+            }
+          ]
+        },
+        "remote-assistance": {
+          title: "XR Programs For Aerospace Remote Assistance",
+          summary:
+            "Connect field, hangar, and partner teams with remote specialists who can guide work using shared visual context.",
+          why:
+            "Specialized aerospace expertise is often centralized while assets are distributed. XR remote assistance reduces delay without sacrificing precision.",
+          deployment:
+            "Begin with troubleshooting and inspection support cases where specialist travel creates significant cycle time.",
+          motion: "Distribute Specialist Knowledge",
+          impacts: [
+            "Reduce support delay across distributed assets",
+            "Improve field accuracy with guided visual input",
+            "Capture resolutions for repeatable future use"
+          ],
+          fit: [
+            "Strong for MRO and partner support networks",
+            "Useful when expert travel is expensive or slow",
+            "Can scale into reusable remote support playbooks"
+          ],
+          recommendations: [
+            {
+              title: "AR Expert Inspection Support",
+              description:
+                "Let remote specialists guide inspections and verification work through live annotations and contextual prompts.",
+              outcomes: ["Higher inspection quality", "Reduced travel", "Faster decisions"]
+            },
+            {
+              title: "WebXR Remote Maintenance Guides",
+              description:
+                "Deliver structured browser-based remote support for troubleshooting, parts identification, and procedural recovery.",
+              outcomes: ["Accessible deployment", "Lower downtime", "Better support consistency"]
+            },
+            {
+              title: "Recorded Troubleshooting Libraries",
+              description:
+                "Convert resolved service events into reusable immersive references for distributed teams.",
+              outcomes: ["Institutional memory", "Faster repeat resolution", "Scalable expertise"]
+            }
+          ]
+        },
+        "maintenance-procedures": {
+          title: "XR Programs For Aerospace Maintenance Procedures",
+          summary:
+            "Support exact maintenance execution with guided overlays, rehearsals, and interactive procedure content built for precision work.",
+          why:
+            "Aerospace maintenance depends on strict step order, detailed verification, and confidence under regulation. XR reduces ambiguity at the point of work.",
+          deployment:
+            "Choose procedures with long ramp times, frequent deviations, or significant documentation burden to show immediate operational value.",
+          motion: "Execute With Precision",
+          impacts: [
+            "Improve consistency on regulated service procedures",
+            "Reduce technician reliance on static manuals",
+            "Support training for rare maintenance events"
+          ],
+          fit: [
+            "Ideal for MRO, inspections, and line maintenance",
+            "Useful where variants complicate procedure fidelity",
+            "Supports stronger documentation discipline"
+          ],
+          recommendations: [
+            {
+              title: "AR Assisted Maintenance Procedures",
+              description:
+                "Deliver step-by-step service guidance, part identification, and verification prompts directly in the technician view.",
+              outcomes: ["Fewer missed steps", "Higher quality", "Less reference switching"]
+            },
+            {
+              title: "VR MRO Rehearsal Modules",
+              description:
+                "Rehearse complex, infrequent, or high-risk maintenance activities before the asset is opened.",
+              outcomes: ["Lower execution risk", "Faster task completion", "Improved technician readiness"]
+            },
+            {
+              title: "Interactive Digital Workcards",
+              description:
+                "Turn static procedures into trackable, guided workflow content accessible across support environments.",
+              outcomes: ["Cleaner governance", "Better updates", "More consistent execution"]
+            }
+          ]
+        }
+      },
+      construction: {
+        "safety-training": {
+          title: "XR Programs For Construction Safety Training",
+          summary:
+            "Prepare crews for high-risk site conditions with realistic hazard rehearsal, orientation content, and procedural practice before boots hit the work zone.",
+          why:
+            "Construction safety depends on recognition and response in changing environments. XR helps crews practice in realistic site conditions without live exposure.",
+          deployment:
+            "Start with recurring high-risk workflows or site orientation needs where incident prevention and consistency matter most.",
+          motion: "Guide Work In Context",
+          impacts: [
+            "Improve hazard recognition before site entry",
+            "Standardize training across crews and contractors",
+            "Support onboarding for changing project conditions"
+          ],
+          fit: [
+            "Strong for fall protection and site orientation",
+            "Useful across shifting crews and subcontractors",
+            "Works well with browser-based access for distributed teams"
+          ],
+          recommendations: [
+            {
+              title: "VR Site Hazard Simulations",
+              description:
+                "Train crews on fall risks, heavy equipment interaction, and emergency decisions inside realistic jobsite scenarios.",
+              outcomes: ["Better hazard awareness", "Safer behavior", "Reduced incident risk"]
+            },
+            {
+              title: "AR Assisted Site Inspections",
+              description:
+                "Guide supervisors and crews through safety checks with in-context prompts and documentation support.",
+              outcomes: ["Fewer missed issues", "Faster inspections", "Improved consistency"]
+            },
+            {
+              title: "WebXR Jobsite Orientation",
+              description:
+                "Deliver project-specific site walkthroughs, zone rules, and emergency procedures across any browser-capable device.",
+              outcomes: ["Faster onboarding", "Scalable contractor access", "Better retention"]
+            }
+          ]
+        },
+        "equipment-onboarding": {
+          title: "XR Programs For Construction Equipment Onboarding",
+          summary:
+            "Use immersive practice and contextual overlays to help crews ramp on heavy equipment, tools, and site-specific systems faster.",
+          why:
+            "Construction onboarding is constrained by equipment access, shifting job sites, and varied experience levels. XR makes practice scalable without interrupting operations.",
+          deployment:
+            "Prioritize equipment and tools with long ramp times, high misuse cost, or strong safety dependencies.",
+          motion: "Accelerate Field Readiness",
+          impacts: [
+            "Shorten onboarding on complex site equipment",
+            "Reduce trainer and equipment scheduling pressure",
+            "Create a repeatable baseline for mixed-experience crews"
+          ],
+          fit: [
+            "Useful for cranes, lifts, and specialized tools",
+            "Strong on fast-moving or remote projects",
+            "Can be reused across project phases"
+          ],
+          recommendations: [
+            {
+              title: "VR Heavy Equipment Familiarization",
+              description:
+                "Teach controls, blind spots, startup sequences, and common field decisions before crews work with live equipment.",
+              outcomes: ["Faster confidence", "Safer operation", "Lower live training load"]
+            },
+            {
+              title: "AR Tool And System Walkthroughs",
+              description:
+                "Overlay key controls, setup steps, and safe-use zones during first-use onboarding in the field.",
+              outcomes: ["Clearer understanding", "Better retention", "Less trainer repetition"]
+            },
+            {
+              title: "Interactive Browser-Based SOPs",
+              description:
+                "Provide accessible, measurable onboarding content that crews can revisit across devices and job sites.",
+              outcomes: ["Easy deployment", "More consistent instruction", "Simple updates"]
+            }
+          ]
+        },
+        "soft-skills": {
+          title: "XR Programs For Construction Soft Skills",
+          summary:
+            "Support communication, leadership, and coordination training for site teams working under time pressure and changing conditions.",
+          why:
+            "Construction outcomes depend on how people communicate about risk, sequence, and change. XR makes those human interactions trainable without disrupting the field.",
+          deployment:
+            "Focus on foreman communication, safety intervention, and multi-trade coordination to improve field execution.",
+          motion: "Align The Crew",
+          impacts: [
+            "Improve communication during dynamic site conditions",
+            "Strengthen supervisor coaching and intervention skills",
+            "Reduce coordination gaps across trades"
+          ],
+          fit: [
+            "Strong for foremen and site leadership development",
+            "Useful for safety culture reinforcement",
+            "Can reflect project-specific conditions and trades"
+          ],
+          recommendations: [
+            {
+              title: "Foreman Communication Simulations",
+              description:
+                "Rehearse briefings, corrections, and conflict resolution with crews in realistic project scenarios.",
+              outcomes: ["Clearer leadership", "Stronger team alignment", "Reduced confusion"]
+            },
+            {
+              title: "Safety Intervention Roleplay",
+              description:
+                "Train teams to speak up and respond effectively when unsafe behavior or conditions appear on site.",
+              outcomes: ["Safer culture", "More confident intervention", "Better peer accountability"]
+            },
+            {
+              title: "Trade Coordination Scenarios",
+              description:
+                "Simulate sequencing conflicts and project changes so crews practice proactive communication under pressure.",
+              outcomes: ["Fewer coordination misses", "Less rework", "Better planning discipline"]
+            }
+          ]
+        },
+        "remote-assistance": {
+          title: "XR Programs For Construction Remote Assistance",
+          summary:
+            "Connect field teams with remote experts who can guide installation, troubleshooting, and verification from anywhere.",
+          why:
+            "Construction teams often need rapid support across dispersed sites. XR remote assistance shortens the path to answers while preserving jobsite context.",
+          deployment:
+            "Use remote support first for specialty installations, commissioning, or troubleshooting where travel delays work progress.",
+          motion: "Extend Site Expertise",
+          impacts: [
+            "Reduce delays waiting for specialists to arrive",
+            "Improve installation quality with visual guidance",
+            "Capture support knowledge for future projects"
+          ],
+          fit: [
+            "Strong for commissioning and specialty systems",
+            "Useful across remote and multi-site projects",
+            "Scales well through browser-delivered guidance"
+          ],
+          recommendations: [
+            {
+              title: "WebXR Remote Installation Guides",
+              description:
+                "Provide structured visual support for field crews during installation, adjustment, and verification tasks.",
+              outcomes: ["Faster issue resolution", "Lower travel cost", "Improved quality"]
+            },
+            {
+              title: "AR Expert Assist For Field Crews",
+              description:
+                "Enable remote experts to annotate the live jobsite view so crews can act with more confidence and less ambiguity.",
+              outcomes: ["Better clarity", "Higher first-time success", "Broader specialist reach"]
+            },
+            {
+              title: "Captured Field Support Modules",
+              description:
+                "Turn solved field challenges into repeatable guidance assets for future crews and projects.",
+              outcomes: ["Retained knowledge", "Faster next deployment", "Less repeated troubleshooting"]
+            }
+          ]
+        },
+        "maintenance-procedures": {
+          title: "XR Programs For Construction Maintenance Procedures",
+          summary:
+            "Standardize service, inspection, and turnover procedures on complex building systems with guided step-aware workflows.",
+          why:
+            "Construction and facilities teams work across systems with different vendors, documentation quality, and turnover pressures. XR keeps procedures clear at the point of work.",
+          deployment:
+            "Target commissioning and maintenance workflows that suffer from inconsistent execution or fragmented documentation.",
+          motion: "Standardize Field Service",
+          impacts: [
+            "Improve procedure consistency across crews",
+            "Reduce manual lookup during service work",
+            "Support turnover and facilities training"
+          ],
+          fit: [
+            "Useful for HVAC, electrical, and specialty systems",
+            "Strong where documentation is fragmented",
+            "Can support both construction and long-term operations teams"
+          ],
+          recommendations: [
+            {
+              title: "AR Assisted Building System Procedures",
+              description:
+                "Overlay service steps, access points, and verification tasks onto physical systems during inspection and maintenance.",
+              outcomes: ["Fewer missed steps", "Better documentation", "Quicker task completion"]
+            },
+            {
+              title: "VR Commissioning Rehearsal",
+              description:
+                "Practice handover and startup workflows before teams enter compressed commissioning windows.",
+              outcomes: ["Lower startup risk", "Higher team readiness", "Less schedule pressure"]
+            },
+            {
+              title: "Interactive Turnover Playbooks",
+              description:
+                "Deliver structured digital procedure content for facilities teams inheriting newly delivered systems.",
+              outcomes: ["Cleaner handoff", "Easier updates", "More usable documentation"]
+            }
+          ]
+        }
+      },
+      education: {
+        "safety-training": {
+          title: "XR Programs For Education Safety Training",
+          summary:
+            "Use immersive experiences to prepare learners and staff for lab safety, campus response, and hazardous task awareness with higher engagement.",
+          why:
+            "Educational settings need memorable, accessible safety training that works across varied experience levels. XR improves retention by making consequences and context tangible.",
+          deployment:
+            "Begin with labs, shops, or campus procedures where incidents are avoidable but live rehearsal is limited or disruptive.",
+          motion: "Increase Engagement",
+          impacts: [
+            "Make safety concepts more memorable and applied",
+            "Support consistent training across large cohorts",
+            "Improve readiness before learners enter live environments"
+          ],
+          fit: [
+            "Strong for lab, shop, and campus orientation programs",
+            "Useful for schools, colleges, and workforce training",
+            "Works well when experiential learning matters"
+          ],
+          recommendations: [
+            {
+              title: "VR Lab Safety Simulations",
+              description:
+                "Train learners on hazard identification, emergency response, and correct process in realistic virtual learning spaces.",
+              outcomes: ["Higher retention", "Safer first exposure", "Better learner engagement"]
+            },
+            {
+              title: "AR Safety Check Experiences",
+              description:
+                "Guide students through equipment and workspace readiness checks with contextual overlays.",
+              outcomes: ["Fewer oversights", "Clearer preparation", "Better independent practice"]
+            },
+            {
+              title: "WebXR Campus Orientation Modules",
+              description:
+                "Provide browser-based walkthroughs for safety protocols, emergency routes, and restricted spaces.",
+              outcomes: ["Scalable delivery", "Easy access", "Consistent messaging"]
+            }
+          ]
+        },
+        "equipment-onboarding": {
+          title: "XR Programs For Education Equipment Onboarding",
+          summary:
+            "Help learners and instructors ramp on tools, lab equipment, and training systems through guided immersive practice.",
+          why:
+            "Students learn faster when they can explore equipment without fear of breaking it, holding up class time, or waiting for one-on-one instruction.",
+          deployment:
+            "Focus on high-value tools, limited-access lab equipment, or programs that need stronger self-directed learning support.",
+          motion: "Build Hands-On Confidence",
+          impacts: [
+            "Increase learner confidence before live use",
+            "Reduce instructor repetition during setup training",
+            "Support self-paced technical education"
+          ],
+          fit: [
+            "Strong for labs, trades, and technical education",
+            "Useful when class sizes stretch instructor time",
+            "Can extend into workforce transition programs"
+          ],
+          recommendations: [
+            {
+              title: "Interactive Equipment Walkthroughs",
+              description:
+                "Teach parts, controls, and setup sequences through spatial guided exploration.",
+              outcomes: ["Faster understanding", "Lower instructor load", "Improved learner readiness"]
+            },
+            {
+              title: "VR First-Use Practice Labs",
+              description:
+                "Let students rehearse operation and troubleshooting before they enter live practical sessions.",
+              outcomes: ["Safer learning", "Better performance", "Greater confidence"]
+            },
+            {
+              title: "Browser-Based Learning Modules",
+              description:
+                "Deliver accessible equipment onboarding content that can be revisited between classes or placements.",
+              outcomes: ["Flexible access", "Consistent instruction", "Easy distribution"]
+            }
+          ]
+        },
+        "soft-skills": {
+          title: "XR Programs For Education Soft Skills",
+          summary:
+            "Use immersive roleplay to build communication, empathy, teamwork, and career-readiness skills in more active ways than static classroom exercises.",
+          why:
+            "Soft skills improve through practice, not just instruction. XR creates responsive scenarios learners can repeat until the behavior becomes more natural.",
+          deployment:
+            "Use immersive roleplay in leadership, healthcare, trades, and career-prep programs where human interaction is a core learning outcome.",
+          motion: "Practice Human Skills",
+          impacts: [
+            "Increase learner engagement in discussion-heavy content",
+            "Create measurable practice for communication skills",
+            "Support employability and workplace readiness programs"
+          ],
+          fit: [
+            "Strong for post-secondary and workforce development",
+            "Useful for counseling, healthcare, and service programs",
+            "Can be adapted to many learner levels"
+          ],
+          recommendations: [
+            {
+              title: "Soft Skill Simulations",
+              description:
+                "Guide learners through interviews, conflict resolution, teamwork, and customer interactions in immersive scenarios.",
+              outcomes: ["More active learning", "Better reflection", "Improved confidence"]
+            },
+            {
+              title: "Empathy And Perspective Modules",
+              description:
+                "Use XR to help learners understand communication barriers, accessibility needs, and social context.",
+              outcomes: ["Stronger empathy", "Broader awareness", "Deeper discussion"]
+            },
+            {
+              title: "Career Readiness Roleplay",
+              description:
+                "Prepare students for workplace conversations, feedback, and collaboration before placements or job entry.",
+              outcomes: ["Higher readiness", "Better communication", "More relevant practice"]
+            }
+          ]
+        },
+        "remote-assistance": {
+          title: "XR Programs For Education Remote Assistance",
+          summary:
+            "Support learners, instructors, and technical programs with remote guidance that keeps spatial context visible during help sessions.",
+          why:
+            "Remote assistance is valuable when instructors, lab staff, or experts cannot be physically present but learners still need contextual guidance.",
+          deployment:
+            "Start with distributed programs, satellite campuses, or technical instruction where remote support can unlock access and flexibility.",
+          motion: "Extend Teaching Reach",
+          impacts: [
+            "Increase access to expert guidance across locations",
+            "Support remote labs and technical instruction",
+            "Preserve context during troubleshooting and coaching"
+          ],
+          fit: [
+            "Useful for technical education and distributed campuses",
+            "Strong where expert access is limited",
+            "Can complement hybrid learning models"
+          ],
+          recommendations: [
+            {
+              title: "WebXR Remote Lab Support",
+              description:
+                "Provide browser-based spatial guidance during remote lab sessions, troubleshooting, and demonstrations.",
+              outcomes: ["Better access", "Improved support quality", "Flexible learning"]
+            },
+            {
+              title: "AR Expert Guidance For Technical Programs",
+              description:
+                "Allow instructors or specialists to guide learners through live physical tasks using annotations and prompts.",
+              outcomes: ["Clearer support", "Faster problem solving", "More scalable expertise"]
+            },
+            {
+              title: "Recorded Assistance Libraries",
+              description:
+                "Capture resolved support sessions and turn them into reusable interactive help content for future cohorts.",
+              outcomes: ["Retained knowledge", "Less repeat support", "Improved self-service"]
+            }
+          ]
+        },
+        "maintenance-procedures": {
+          title: "XR Programs For Education Maintenance Procedures",
+          summary:
+            "Train staff and learners on repeatable maintenance, lab upkeep, and technical service procedures with guided contextual content.",
+          why:
+            "Educational institutions often manage varied equipment with limited technical staff. XR helps maintain procedure quality while supporting training and continuity.",
+          deployment:
+            "Use guided maintenance content for technical labs, maker spaces, and campus systems where staff turnover or documentation gaps create risk.",
+          motion: "Support Repeatable Care",
+          impacts: [
+            "Preserve technical knowledge across staff changes",
+            "Improve procedure adherence in labs and shops",
+            "Reduce dependency on static manuals"
+          ],
+          fit: [
+            "Useful for makerspaces, technical labs, and campus support",
+            "Strong where staff wear many hats",
+            "Can serve both operations and instructional use"
+          ],
+          recommendations: [
+            {
+              title: "AR Guided Lab Maintenance",
+              description:
+                "Display service steps, checks, and part references directly where maintenance work happens.",
+              outcomes: ["More consistent upkeep", "Better documentation", "Faster task completion"]
+            },
+            {
+              title: "VR Procedure Rehearsal",
+              description:
+                "Rehearse rare maintenance tasks or shutdown steps before touching critical equipment.",
+              outcomes: ["Lower risk", "Higher confidence", "Improved readiness"]
+            },
+            {
+              title: "Interactive Procedure Libraries",
+              description:
+                "Replace scattered manuals with controlled digital maintenance guides that teams can access across devices.",
+              outcomes: ["Cleaner knowledge transfer", "Simpler updates", "More usable documentation"]
+            }
+          ]
+        }
+      }
+    };
+
+    const state = {
+      industry: "manufacturing",
+      challenge: "safety-training"
+    };
+
+    const industryOptions = document.getElementById("industry-options");
+    const challengeOptions = document.getElementById("challenge-options");
+    const industryCurrentLabel = document.getElementById("industry-current-label");
+    const challengeCurrentLabel = document.getElementById("challenge-current-label");
+    const industryChip = document.getElementById("industry-chip");
+    const challengeChip = document.getElementById("challenge-chip");
+    const motionChip = document.getElementById("motion-chip");
+    const scenarioTitle = document.getElementById("scenario-title");
+    const scenarioSummary = document.getElementById("scenario-summary");
+    const whyItWorks = document.getElementById("why-it-works");
+    const deploymentNotes = document.getElementById("deployment-notes");
+    const briefImpactCopy = document.getElementById("brief-impact-copy");
+    const impactList = document.getElementById("impact-list");
+    const fitList = document.getElementById("fit-list");
+    const recommendationGrid = document.getElementById("recommendation-grid");
+    const ctaCopy = document.getElementById("cta-copy");
+    const ctaLink = document.getElementById("cta-link");
+    const themeToggle = document.getElementById("theme-toggle");
+    const siteLogo = document.getElementById("site-logo");
+    const clientNameInput = document.getElementById("client-name");
+    const projectNameInput = document.getElementById("project-name");
+    const contactNameInput = document.getElementById("contact-name");
+    const priorityLevelInput = document.getElementById("priority-level");
+    const scenarioNotesInput = document.getElementById("scenario-notes");
+    const clientOutput = document.getElementById("client-output");
+    const projectOutput = document.getElementById("project-output");
+    const contactOutput = document.getElementById("contact-output");
+    const dateOutput = document.getElementById("date-output");
+    const notesOutput = document.getElementById("notes-output");
+    const downloadPdfButton = document.getElementById("download-pdf");
+    const resetToolButton = document.getElementById("reset-tool");
+
+    function formatDate() {
+      return new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }).format(new Date());
+    }
+
+    function getTextValue(value, fallback) {
+      const normalized = value.trim();
+      return normalized ? normalized : fallback;
+    }
+
+    function renderBriefFields() {
+      clientOutput.textContent = getTextValue(clientNameInput.value, "Not Set");
+      projectOutput.textContent = getTextValue(projectNameInput.value, "Scenario Discovery");
+      contactOutput.textContent = getTextValue(contactNameInput.value, "BSD XR");
+      dateOutput.textContent = formatDate();
+
+      const noteValue = scenarioNotesInput.value.trim();
+      notesOutput.textContent = noteValue
+        ? noteValue
+        : "No client-specific notes added yet. Use this section to capture goals, blockers, or rollout constraints.";
+    }
+
+    function createOptionButton(item, type) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "option-button";
+      button.dataset.type = type;
+      button.dataset.id = item.id;
+      button.innerHTML =
+        '<span class="option-kicker">' +
+        item.kicker +
+        "</span><span>" +
+        item.name +
+        "</span>";
+      return button;
+    }
+
+    function renderOptionGroups() {
+      industries.forEach((industry) => {
+        industryOptions.appendChild(createOptionButton(industry, "industry"));
+      });
+
+      challenges.forEach((challenge) => {
+        challengeOptions.appendChild(createOptionButton(challenge, "challenge"));
+      });
+    }
+
+    function renderList(target, items) {
+      target.innerHTML = "";
+      items.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        target.appendChild(li);
+      });
+    }
+
+    function renderRecommendations(recommendations) {
+      recommendationGrid.innerHTML = "";
+      recommendations.forEach((recommendation, index) => {
+        const article = document.createElement("article");
+        article.className = "result-card";
+        article.innerHTML =
+          '<div class="rank">Recommendation 0' +
+          (index + 1) +
+          "</div>" +
+          "<h3>" +
+          recommendation.title +
+          "</h3>" +
+          "<p>" +
+          recommendation.description +
+          "</p>" +
+          "<ul>" +
+          recommendation.outcomes.map((outcome) => "<li>" + outcome + "</li>").join("") +
+          "</ul>" +
+          "<footer>Mapped To The Current Industry + Challenge Selection</footer>";
+        recommendationGrid.appendChild(article);
+      });
+    }
+
+    function renderScenario() {
+      const industry = industries.find((entry) => entry.id === state.industry);
+      const challenge = challenges.find((entry) => entry.id === state.challenge);
+      const scenario = scenarioMap[state.industry][state.challenge];
+
+      industryCurrentLabel.textContent = industry.name;
+      challengeCurrentLabel.textContent = challenge.name;
+      industryChip.textContent = industry.name;
+      challengeChip.textContent = challenge.name;
+      motionChip.textContent = scenario.motion || industry.motion;
+      scenarioTitle.textContent = scenario.title;
+      scenarioSummary.textContent = scenario.summary;
+      whyItWorks.textContent = scenario.why;
+      briefImpactCopy.textContent =
+        "Primary opportunity for " + industry.name + " facing " + challenge.name + ".";
+      deploymentNotes.textContent = scenario.deployment;
+      ctaCopy.textContent =
+        "Talk through " +
+        industry.name +
+        " / " +
+        challenge.name +
+        " with BSD XR and turn this recommendation into a scoped use case. Priority: " +
+        getTextValue(priorityLevelInput.value, "Discovery");
+      ctaLink.href =
+        "https://bsdxr.com/contact?industry=" +
+        encodeURIComponent(industry.name) +
+        "&challenge=" +
+        encodeURIComponent(challenge.name);
+
+      renderList(impactList, scenario.impacts);
+      renderList(fitList, scenario.fit);
+      renderRecommendations(scenario.recommendations);
+
+      document.querySelectorAll('.option-button[data-type="industry"]').forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.id === state.industry);
+      });
+
+      document.querySelectorAll('.option-button[data-type="challenge"]').forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.id === state.challenge);
+      });
+    }
+
+    function updateLogo() {
+      siteLogo.src = document.documentElement.classList.contains("light")
+        ? "./branding/logo-light.png"
+        : "./branding/logo-dark.png";
+    }
+
+    renderOptionGroups();
+    renderScenario();
+    renderBriefFields();
+    updateLogo();
+
+    document.addEventListener("click", (event) => {
+      const target = event.target.closest(".option-button");
+      if (!target) {
+        return;
+      }
+
+      const { type, id } = target.dataset;
+      state[type] = id;
+      renderScenario();
+    });
+
+    themeToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("light");
+      updateLogo();
+      try {
+        localStorage.setItem(
+          "bsdxr-theme",
+          document.documentElement.classList.contains("light") ? "light" : "dark"
+        );
+      } catch (error) {}
+    });
+
+    [clientNameInput, projectNameInput, contactNameInput, priorityLevelInput, scenarioNotesInput].forEach(
+      (input) => {
+        input.addEventListener("input", () => {
+          renderBriefFields();
+          renderScenario();
+        });
+      }
+    );
+
+    resetToolButton.addEventListener("click", () => {
+      state.industry = "manufacturing";
+      state.challenge = "safety-training";
+      clientNameInput.value = "";
+      projectNameInput.value = "";
+      contactNameInput.value = "";
+      priorityLevelInput.value = "";
+      scenarioNotesInput.value = "";
+      renderBriefFields();
+      renderScenario();
+    });
+
+    downloadPdfButton.addEventListener("click", () => {
+      renderBriefFields();
+      renderScenario();
+      const projectName = getTextValue(projectNameInput.value, "Scenario Brief");
+      const previousTitle = document.title;
+      document.title = "BSD XR - " + projectName;
+      window.print();
+      setTimeout(() => {
+        document.title = previousTitle;
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
