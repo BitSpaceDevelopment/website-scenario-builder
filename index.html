@@ -246,6 +246,14 @@
       border-color: rgb(var(--color-accent));
     }
 
+    .link-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      text-decoration: none;
+    }
+
     .workspace {
       display: grid;
       grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
@@ -578,6 +586,97 @@
       border-color: rgb(var(--color-accent));
     }
 
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgb(0 0 0 / 0.72);
+    }
+
+    .modal-backdrop.is-open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: min(760px, 100%);
+      max-height: min(88vh, 900px);
+      overflow: auto;
+      background: rgb(var(--color-surface));
+      border: 1px solid rgb(var(--color-border-light));
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgb(var(--color-border));
+    }
+
+    .modal-header h2 {
+      font-size: 24px;
+      line-height: 1.1;
+      margin-top: 8px;
+    }
+
+    .modal-copy,
+    .modal-panel p {
+      font-size: 12px;
+      color: rgb(var(--color-muted));
+      line-height: 1.8;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .modal-card {
+      border: 1px solid rgb(var(--color-border));
+      background: rgb(var(--color-background));
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .modal-card ul {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .modal-card li {
+      position: relative;
+      padding-left: 16px;
+      font-size: 11px;
+      line-height: 1.7;
+      color: rgb(var(--color-text));
+    }
+
+    .modal-card li::before {
+      content: "+";
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: rgb(var(--color-accent));
+    }
+
+    .modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
     .footer-note {
       margin-top: 28px;
       padding-top: 18px;
@@ -653,6 +752,15 @@
         gap: 14px;
       }
 
+      .modal-header,
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-grid {
+        grid-template-columns: 1fr;
+      }
+
       .preview-header h2 {
         max-width: none;
         font-size: 22px;
@@ -689,6 +797,10 @@
       .action-button {
         width: 100%;
         text-align: center;
+      }
+
+      .modal-panel {
+        padding: 18px;
       }
     }
 
@@ -794,6 +906,7 @@
           <p class="panel-copy">Configure the scenario, review the brief, then export it as a PDF.</p>
         </div>
         <div class="action-cluster">
+          <button id="open-about-modal" class="action-button" type="button">About BSD XR</button>
           <button id="reset-tool" class="action-button" type="button">Reset</button>
           <button id="download-pdf" class="action-button action-button--primary" type="button">Generate PDF</button>
         </div>
@@ -978,7 +1091,7 @@
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Talk To BSD XR About This Scenario
+                    Request A Quote From BSD XR
                   </a>
                 </article>
               </div>
@@ -993,6 +1106,87 @@
       </section>
     </section>
   </main>
+
+  <div id="about-modal" class="modal-backdrop" aria-hidden="true">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+      aria-describedby="about-modal-copy"
+    >
+      <div class="modal-header">
+        <div>
+          <div class="eyebrow">About BSD XR</div>
+          <h2 id="about-modal-title">Immersive Technology Experts</h2>
+          <p id="about-modal-copy" class="modal-copy">
+            Bit Space Development Ltd. builds XR, AR, VR, WebXR, and AI solutions for organizations
+            that need safer training, better operational clarity, and stronger engagement.
+          </p>
+        </div>
+        <button id="close-about-modal" class="action-button" type="button" aria-label="Close About BSD XR Modal">
+          Close
+        </button>
+      </div>
+
+      <div class="modal-grid">
+        <article class="modal-card">
+          <div class="eyebrow">What BSD XR Does</div>
+          <ul>
+            <li>Designs immersive training and simulation experiences for high-stakes industries.</li>
+            <li>Builds AR and WebXR tools that guide work, inspections, onboarding, and remote support.</li>
+            <li>Translates operational problems into deployable XR products with measurable outcomes.</li>
+          </ul>
+        </article>
+
+        <article class="modal-card">
+          <div class="eyebrow">Why Teams Work With BSD XR</div>
+          <ul>
+            <li>Experience across manufacturing, healthcare, aerospace, construction, education, and more.</li>
+            <li>Design-led, research-driven approach focused on precision, usability, and adoption.</li>
+            <li>Strong fit for pilots, enterprise training programs, digital workflow tools, and innovation initiatives.</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="modal-grid">
+        <article class="modal-card">
+          <div class="eyebrow">Company Snapshot</div>
+          <ul>
+            <li>Founded in 2015.</li>
+            <li>Based in Winnipeg, Manitoba, Canada.</li>
+            <li>Focus areas include XR / AR / VR / AI / immersive workflow design.</li>
+          </ul>
+        </article>
+
+        <article class="modal-card">
+          <div class="eyebrow">Best Next Step</div>
+          <p>
+            If this scenario looks relevant, the fastest path forward is a quote or scoping conversation
+            with the BSD XR team.
+          </p>
+          <div class="modal-actions">
+            <a
+              class="action-button action-button--primary link-button"
+              href="https://bsdxr.com/contact"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Request A Quote
+            </a>
+            <a
+              class="action-button link-button"
+              href="https://bsdxr.com"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Visit BSDXR.com
+            </a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
 
   <script>
     const industries = [
@@ -2113,6 +2307,9 @@
     const planningList = document.getElementById("planning-list");
     const downloadPdfButton = document.getElementById("download-pdf");
     const resetToolButton = document.getElementById("reset-tool");
+    const openAboutModalButton = document.getElementById("open-about-modal");
+    const closeAboutModalButton = document.getElementById("close-about-modal");
+    const aboutModal = document.getElementById("about-modal");
 
     function formatDate() {
       return new Intl.DateTimeFormat("en-CA", {
@@ -2257,6 +2454,12 @@
         : "./branding/logo-dark.png";
     }
 
+    function setModalState(isOpen) {
+      aboutModal.classList.toggle("is-open", isOpen);
+      aboutModal.setAttribute("aria-hidden", String(!isOpen));
+      document.body.style.overflow = isOpen ? "hidden" : "";
+    }
+
     renderOptionGroups();
     renderScenario();
     renderBriefFields();
@@ -2321,6 +2524,26 @@
       scenarioNotesInput.value = "";
       renderBriefFields();
       renderScenario();
+    });
+
+    openAboutModalButton.addEventListener("click", () => {
+      setModalState(true);
+    });
+
+    closeAboutModalButton.addEventListener("click", () => {
+      setModalState(false);
+    });
+
+    aboutModal.addEventListener("click", (event) => {
+      if (event.target === aboutModal) {
+        setModalState(false);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && aboutModal.classList.contains("is-open")) {
+        setModalState(false);
+      }
     });
 
     downloadPdfButton.addEventListener("click", () => {
